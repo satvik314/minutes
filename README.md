@@ -1,10 +1,12 @@
 # Minutes
 
 A personal meeting notebook, as a Chrome extension. Open any browser-based
-meeting (Google Meet, Zoom web, …), press the wax seal, and Minutes listens to
-both sides of the conversation — the tab's audio and your microphone — and
-writes a live transcript onto a ruled paper page in the side panel. When you
-stop, the meeting is filed as a Markdown transcript in
+meeting (Google Meet, Zoom web, …), click the toolbar seal, press record, and
+Minutes listens to both sides of the conversation — the tab's audio and your
+microphone — and writes a live transcript onto a ruled paper page. Close the
+popup and it keeps listening (a small `REC` badge sits on the toolbar icon);
+reopen it any time to watch the page write itself. When you stop, the meeting
+is filed as a Markdown transcript in
 `Downloads/Meetings/YYYY-MM-DD_HH-MM_tab-title.md`, and kept in the notebook's
 library.
 
@@ -15,8 +17,8 @@ library.
    `env.js` is gitignored — the key stays on your machine.
 2. Open `chrome://extensions`, enable **Developer mode** (top right), click
    **Load unpacked**, and select this folder.
-3. Open your meeting tab, click the Minutes icon to open the side panel, and
-   press the seal. Allow microphone access the first time so your side of the
+3. Open your meeting tab, click the Minutes icon, and press the seal. The
+   first time, a short page asks for microphone access so your side of the
    conversation is transcribed too.
 
 Notes:
@@ -35,9 +37,10 @@ three cooperating contexts:
 
 | File | Context | Role |
 | --- | --- | --- |
-| `background.js` | service worker | mints the tabCapture stream id, owns the meeting archive in `chrome.storage.local`, saves transcripts via `chrome.downloads`, recovers crashed sessions |
-| `offscreen.html` + `src/offscreen.js` | offscreen document | captures tab + mic audio, keeps the tab audible, mixes and downsamples to 16 kHz PCM16 in an `AudioWorklet`, streams chunks to `ai.live.connect` / `sendRealtimeInput`, assembles timestamped paragraphs |
-| `sidepanel.html/css/js` | side panel | the notebook: live page, library of past meetings, transcript reader |
+| `background.js` | service worker | mints the tabCapture stream id, owns the meeting archive in `chrome.storage.local`, saves transcripts via `chrome.downloads`, recovers crashed sessions, keeps the `REC` badge honest |
+| `offscreen.html` + `src/offscreen.js` | offscreen document | captures tab + mic audio, keeps the tab audible, mixes and downsamples to 16 kHz PCM16 in an `AudioWorklet`, streams chunks to `ai.live.connect` / `sendRealtimeInput`, assembles timestamped paragraphs — and keeps recording while the popup is closed |
+| `popup.html/css/js` | action popup | the notebook: live page, library of past meetings, transcript reader |
+| `mic.html/js` | one-time page | asks for the microphone once (permission prompts can't survive inside a popup) |
 
 `offscreen.js` (at the repo root) is the committed esbuild bundle of
 `src/offscreen.js` with the `@google/genai` SDK, so the extension loads
