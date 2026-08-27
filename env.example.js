@@ -10,5 +10,5 @@ self.MINUTES_ENV = {
   GEMINI_API_KEY: "PASTE_YOUR_GEMINI_API_KEY_HERE",
 
   // Optional: override the live transcription model.
-  MODEL: "gemini-3.5-transcribe-live",
+  MODEL: "models/gemini-3.5-transcribe-live",
 };

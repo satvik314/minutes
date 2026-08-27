@@ -10,9 +10,9 @@
 // chrome.storage.local on a short debounce, so a crash at any point loses at
 // most ~1.5 s of text.
 
-import { GoogleGenAI, Modality } from '@google/genai';
+import { GoogleGenAI, MediaResolution, Modality } from '@google/genai';
 
-const DEFAULT_MODEL = 'gemini-3.5-transcribe-live';
+const DEFAULT_MODEL = 'models/gemini-3.5-transcribe-live';
 const SAMPLE_RATE = 16000;
 const PARAGRAPH_GAP_MS = 8000; // silence long enough to start a new paragraph
 const PERSIST_DEBOUNCE_MS = 1500;
@@ -204,14 +204,18 @@ async function connectGemini(apiKey) {
 
   state.session = await ai.live.connect({
     model,
+    // Mirrors the AI Studio reference config for this model. The transcript
+    // arrives as modelTurn text parts (handleServerMessage also accepts the
+    // inputTranscription channel, should the model use it).
     config: {
-      // The Live API requires exactly one response modality; we only care
-      // about the input-side transcription stream.
       responseModalities: [Modality.TEXT],
-      inputAudioTranscription: {},
+      mediaResolution: MediaResolution.MEDIA_RESOLUTION_MEDIUM,
       // Meetings run long — let the server compress old context instead of
       // killing the session when the window fills.
-      contextWindowCompression: { slidingWindow: {} },
+      contextWindowCompression: {
+        triggerTokens: '104857',
+        slidingWindow: { targetTokens: '52428' },
+      },
     },
     callbacks: {
       onopen: () => {

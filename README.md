@@ -22,7 +22,7 @@ library.
 Notes:
 
 - Transcription streams to the Gemini Live API
-  (model `gemini-3.5-transcribe-live`; override via `MODEL` in `env.js`).
+  (model `models/gemini-3.5-transcribe-live`; override via `MODEL` in `env.js`).
 - Saving is silent as long as Chrome's *"Ask where to save each file before
   downloading"* setting is off (the default).
 - If Chrome or the session dies mid-meeting, the partial transcript is
