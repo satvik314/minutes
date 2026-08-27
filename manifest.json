@@ -4,16 +4,14 @@
   "version": "1.0.0",
   "description": "A personal meeting notebook. Live-transcribes any browser meeting with Gemini and archives every meeting to Downloads/Meetings.",
   "minimum_chrome_version": "116",
-  "permissions": ["tabCapture", "offscreen", "sidePanel", "storage", "downloads"],
+  "permissions": ["tabCapture", "offscreen", "activeTab", "storage", "downloads"],
   "host_permissions": ["https://generativelanguage.googleapis.com/*"],
   "background": {
     "service_worker": "background.js"
   },
-  "side_panel": {
-    "default_path": "sidepanel.html"
-  },
   "action": {
     "default_title": "Open Minutes",
+    "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",

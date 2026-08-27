@@ -8,12 +8,20 @@
 
 const OFFSCREEN_URL = 'offscreen.html';
 
-chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
-
 // Runs on every service-worker boot: any meeting still marked "recording"
 // with no live offscreen document behind it died mid-session. Preserve and
-// archive whatever was transcribed before the crash.
+// archive whatever was transcribed before the crash. Also re-syncs the
+// toolbar badge, the only always-visible sign that Minutes is listening
+// while the popup is closed.
 sweepInterruptedSessions();
+
+function setRecordingBadge(on) {
+  chrome.action.setBadgeText({ text: on ? 'REC' : '' }).catch(() => {});
+  if (on) {
+    chrome.action.setBadgeBackgroundColor({ color: '#a92e23' }).catch(() => {});
+    chrome.action.setBadgeTextColor?.({ color: '#ffffff' }).catch(() => {});
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Storage
@@ -135,6 +143,7 @@ async function startRecording(msg) {
     await closeOffscreenDocument();
     throw new Error(res?.error || 'Could not start audio capture.');
   }
+  setRecordingBadge(true);
   return { sessionId: record.id, startedAt: record.startedAt };
 }
 
@@ -173,6 +182,7 @@ async function finalizeSession(sessionId, { interrupted }) {
   meetings[sessionId] = rec;
   await chrome.storage.local.set({ meetings });
   await closeOffscreenDocument();
+  setRecordingBadge(false);
   broadcast({ type: 'finalized', sessionId, savedAs: rec.savedAs || null, interrupted });
 }
 
@@ -188,11 +198,13 @@ async function handleOffscreenError(msg) {
       delete meetings[msg.sessionId];
       await chrome.storage.local.set({ meetings });
       await closeOffscreenDocument();
+      setRecordingBadge(false);
     } else {
       await finalizeSession(msg.sessionId, { interrupted: true });
     }
   } else {
     await closeOffscreenDocument();
+    setRecordingBadge(false);
   }
 }
 
@@ -213,6 +225,8 @@ async function sweepInterruptedSessions() {
     const rec = await activeRecording();
     if (rec && !(await hasOffscreenDocument())) {
       await finalizeSession(rec.id, { interrupted: true });
+    } else {
+      setRecordingBadge(!!rec);
     }
   } catch (e) {
     // Sweep is best-effort; never block worker boot.

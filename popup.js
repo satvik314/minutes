@@ -1,5 +1,6 @@
-// Minutes — side panel. Rendering and user intent only; audio and the Gemini
-// session live in the offscreen document, orchestration in the service worker.
+// Minutes — popup. Rendering and user intent only; audio and the Gemini
+// session live in the offscreen document, orchestration in the service
+// worker — which is why closing this popup never interrupts a recording.
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -121,18 +122,20 @@ async function onSealPressed() {
   els.seal.disabled = true;
   els.sealLabel.textContent = 'listening for the room…';
 
-  // Ask for the microphone from the panel: offscreen documents cannot show
-  // permission prompts, but a grant here covers the whole extension. Only
-  // prompt when undecided — a long-lived prompt would expire the user
-  // gesture that tabCapture needs.
+  // Mic permission has to be settled before recording: neither the popup
+  // (the prompt steals focus, which closes the popup and cancels the
+  // prompt) nor the offscreen document can show a permission dialog. When
+  // the decision is still pending, a one-time full page asks instead.
   let wantMic = true;
   try {
     const perm = await navigator.permissions.query({ name: 'microphone' });
     if (perm.state === 'denied') {
       wantMic = false;
     } else if (perm.state === 'prompt') {
-      const probe = await navigator.mediaDevices.getUserMedia({ audio: true });
-      probe.getTracks().forEach((t) => t.stop());
+      els.seal.disabled = false;
+      els.sealLabel.textContent = 'press to record';
+      await chrome.tabs.create({ url: chrome.runtime.getURL('mic.html') });
+      return;
     }
   } catch (e) {
     wantMic = false;
@@ -151,6 +154,8 @@ async function onSealPressed() {
   }
   if (!wantMic) {
     showNote('Microphone unavailable — taking down the tab’s audio only.', 'info', 7000);
+  } else {
+    showNote('You can close this window — Minutes keeps listening until you press stop.', 'info', 7000);
   }
   enterRecording(res.sessionId, res.startedAt, []);
 }
