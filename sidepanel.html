@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Minutes</title>
+  <link rel="stylesheet" href="fonts.css" />
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="masthead">
+        <h1>Minutes</h1>
+        <button id="navToggle" class="nav-link" type="button">Notebook &rarr;</button>
+      </div>
+      <div class="dateline">
+        <span id="todayLine"></span>
+        <span id="recIndicator" class="rec hidden">
+          <span class="ink-dot" aria-hidden="true"></span>
+          <span id="recWord">Recording</span>&nbsp;&middot;&nbsp;<span id="elapsed">0:00</span>
+        </span>
+      </div>
+    </header>
+
+    <main id="scroller">
+      <!-- Today: the live page -->
+      <section id="viewLive" class="view page">
+        <div id="emptyLive" class="empty">
+          <p class="empty-hand">A quiet page.</p>
+          <p class="empty-serif">Open your meeting tab, then press the seal below&mdash;Minutes will take everything down.</p>
+        </div>
+        <div id="transcript"></div>
+        <p id="interim" class="interim hidden"></p>
+      </section>
+
+      <!-- Notebook: the library -->
+      <section id="viewLibrary" class="view hidden">
+        <div id="stack"></div>
+        <div id="emptyLibrary" class="empty hidden">
+          <p class="empty-hand">Nothing here yet.</p>
+          <p class="empty-serif">Every meeting you record will be kept on these pages, and filed to Downloads&thinsp;/&thinsp;Meetings.</p>
+        </div>
+      </section>
+
+      <!-- A single past meeting, opened for reading -->
+      <section id="viewReader" class="view page hidden">
+        <div class="reader-head">
+          <button id="readerBack" class="nav-link" type="button">&larr; Notebook</button>
+          <h2 id="readerTitle"></h2>
+          <p id="readerMeta"></p>
+          <button id="readerSave" class="ink-link" type="button">Save again</button>
+        </div>
+        <div id="readerBody"></div>
+      </section>
+    </main>
+
+    <p id="note" class="note hidden"></p>
+
+    <footer id="deck">
+      <button id="seal" type="button" aria-label="Start recording">
+        <span class="seal-face"><span class="seal-glyph" aria-hidden="true"></span></span>
+      </button>
+      <p id="sealLabel" class="seal-label">press to record</p>
+    </footer>
+  </div>
+
+  <!-- Local, gitignored key file; a missing file is handled gracefully. -->
+  <script src="env.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
