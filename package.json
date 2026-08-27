@@ -1,0 +1,17 @@
+{
+  "name": "minutes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A personal meeting notebook — Chrome extension that live-transcribes browser meetings with Gemini.",
+  "scripts": {
+    "build": "esbuild src/offscreen.js --bundle --platform=browser --target=chrome116 --outfile=offscreen.js --minify --log-level=warning",
+    "icons": "node scripts/make-icons.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.19.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "pngjs": "^7.0.0"
+  }
+}
